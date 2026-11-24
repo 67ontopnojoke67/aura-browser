@@ -1,1 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#090c18" />
+  <title>AURA — The private browser</title>
+  <meta name="description" content="AURA is a modern browser built around privacy, speed, and control." />
+  <style>
+    :root {
+      --bg: #090c18;
+      --panel: rgba(19, 24, 46, 0.72);
+      --panel-border: rgba(255,255,255,.09);
+      --text: #f7f8ff;
+      --muted: #a9aec8;
+      --blue: #91a3ff;
+      --violet: #a871ff;
+      --pink: #ef8aff;
+    }
 
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 78% 18%, rgba(112, 98, 255, .18), transparent 24rem),
+        radial-gradient(circle at 12% 72%, rgba(75, 125, 255, .10), transparent 20rem),
+        var(--bg);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .18;
+      background-image: linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: linear-gradient(to bottom, black, transparent 85%);
+    }
+
+    a { color: inherit; text-decoration: none; }
+    .container { width: min(1120px, calc(100% - 40px)); margin-inline: auto; }
+
+    nav {
+      height: 84px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      z-index: 20;
+    }
+
+    .brand { display: flex; align-items: center; gap: 11px; font-weight: 800; letter-spacing: .16em; }
+    .brand-mark {
+      width: 38px; height: 38px; border-radius: 12px;
+      display: grid; place-items: center;
+      background: linear-gradient(145deg, #a7a8ff, #8a64f5);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.25), 0 8px 30px rgba(130,112,255,.25);
+      font-size: 23px;
+    }
+
+    .nav-links { display: flex; align-items: center; gap: 30px; color: var(--muted); font-size: 14px; }
+    .nav-links a:hover { color: white; }
+    .nav-download {
+      color: white !important;
+      border: 1px solid var(--panel-border);
+      background: rgba(255,255,255,.07);
+      padding: 11px 16px;
+      border-radius: 10px;
+    }
+
+    .hero { min-height: 650px; display: grid; grid-template-columns: 1.05fr .95fr; align-items: center; gap: 40px; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 9px;
+      color: #bbc4ff; text-transform: uppercase; letter-spacing: .16em; font-size: 12px; font-weight: 800;
+      border: 1px solid rgba(169,176,255,.14); border-radius: 999px; padding: 8px 12px;
+      background: rgba(141,145,255,.06);
+    }
+    .eyebrow-dot { width: 7px; height: 7px; border-radius: 50%; background: #92a4ff; box-shadow: 0 0 14px #92a4ff; }
+
+    h1 { margin: 22px 0 18px; font-size: clamp(54px, 7vw, 88px); line-height: .92; letter-spacing: -.075em; }
+    .gradient-text { background: linear-gradient(100deg, #fff 10%, #aab8ff 52%, #dc9aff 95%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .hero-copy > p { max-width: 560px; color: var(--muted); font-size: 18px; line-height: 1.72; }
+
+    .actions { display: flex; gap: 12px; margin-top: 32px; }
+    .button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; height: 52px; padding: 0 20px; border-radius: 12px; font-weight: 750; font-size: 15px; }
+    .button-primary { background: linear-gradient(110deg, #a7b2ff, #a183ff); color: #090c18; box-shadow: 0 14px 38px rgba(145,133,255,.22); }
+    .button-secondary { border: 1px solid var(--panel-border); background: rgba(255,255,255,.045); color: white; }
+
+    .browser-stage { position: relative; min-height: 510px; display: grid; place-items: center; perspective: 1000px; }
+    .browser-stage::before {
+      content: ""; position: absolute; width: 390px; height: 390px; border-radius: 50%;
+      background: rgba(117, 111, 255, .22); filter: blur(70px); opacity: .8;
+    }
+
+    .browser {
+      position: relative; width: 510px; height: 330px; transform: rotateY(-7deg) rotateX(3deg);
+      border: 1px solid rgba(178,184,255,.18); border-radius: 18px;
+      background: linear-gradient(145deg, rgba(27,33,64,.94), rgba(10,13,29,.96));
+      box-shadow: 0 35px 80px rgba(0,0,0,.48), inset 0 1px rgba(255,255,255,.05);
+      overflow: hidden;
+    }
+    .browser-bar { height: 47px; border-bottom: 1px solid rgba(255,255,255,.07); display: flex; align-items: center; gap: 7px; padding: 0 14px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #65708f; }
+    .address { margin-left: 9px; height: 27px; flex: 1; border-radius: 7px; background: rgba(255,255,255,.055); display: flex; align-items: center; padding: 0 10px; color: #78819f; font-size: 10px; }
+    .address-lock { margin-right: 7px; color: #9ba9d5; }
+
+    .browser-body { height: calc(100% - 47px); display: grid; grid-template-columns: 85px 1fr; }
+    .sidebar { border-right: 1px solid rgba(255,255,255,.06); padding: 14px 12px; }
+    .sidebar-line { height: 7px; border-radius: 99px; background: rgba(255,255,255,.06); margin-bottom: 13px; }
+    .sidebar-line.active { width: 80%; background: rgba(164,171,255,.18); }
+    .dashboard { padding: 23px; }
+    .dash-top { display: flex; justify-content: space-between; align-items: center; }
+    .mini-logo { width: 43px; height: 43px; border: 1px solid rgba(255,255,255,.12); border-radius: 13px; display: grid; place-items: center; font-size: 22px; background: rgba(255,255,255,.04); }
+    .shield-ring { width: 86px; height: 86px; border: 9px solid rgba(142,158,255,.14); border-top-color: #9ba8ff; border-right-color: #bd83ff; border-radius: 50%; display: grid; place-items: center; margin: 28px auto 18px; box-shadow: 0 0 45px rgba(139,133,255,.12); }
+    .shield-ring span { width: 38px; height: 38px; clip-path: polygon(50% 0, 92% 18%, 82% 74%, 50% 100%, 18% 74%, 8% 18%); background: linear-gradient(145deg, #b2baff, #9572ed); }
+    .dash-title { text-align: center; font-size: 13px; font-weight: 800; }
+    .dash-sub { text-align: center; color: #8089a9; font-size: 9px; margin-top: 6px; }
+
+    .floating-card { position: absolute; z-index: 3; display: flex; align-items: center; gap: 10px; border: 1px solid rgba(255,255,255,.11); background: rgba(20,25,49,.88); backdrop-filter: blur(12px); border-radius: 12px; padding: 10px 12px; font-size: 11px; box-shadow: 0 16px 40px rgba(0,0,0,.3); }
+    .float-one { top: 145px; right: -18px; }
+    .float-two { bottom: 92px; left: -18px; }
+    .card-icon { width: 28px; height: 28px; border-radius: 8px; background: rgba(151,161,255,.13); color: #adb8ff; display: grid; place-items: center; }
+
+    section { padding: 90px 0; }
+    .section-head { text-align: center; max-width: 690px; margin: 0 auto 42px; }
+    .section-kicker { color: #9da9ff; text-transform: uppercase; letter-spacing: .16em; font-size: 12px; font-weight: 800; }
+    h2 { font-size: clamp(38px, 5vw, 58px); line-height: 1.03; letter-spacing: -.055em; margin: 14px 0; }
+    .section-head p { color: var(--muted); line-height: 1.7; }
+
+    .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .feature { min-height: 260px; border: 1px solid var(--panel-border); border-radius: 18px; background: linear-gradient(145deg, rgba(24,29,54,.76), rgba(12,15,31,.76)); padding: 26px; position: relative; overflow: hidden; }
+    .feature::after { content: ""; position: absolute; width: 160px; height: 160px; right: -90px; bottom: -100px; border-radius: 50%; background: rgba(128,118,255,.13); filter: blur(18px); }
+    .feature-icon { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; background: linear-gradient(145deg, rgba(164,174,255,.16), rgba(155,104,241,.08)); border: 1px solid rgba(255,255,255,.09); font-size: 21px; }
+    .feature h3 { margin: 24px 0 10px; font-size: 20px; }
+    .feature p { color: var(--muted); line-height: 1.65; font-size: 14px; }
+
+    .privacy { border-top: 1px solid rgba(255,255,255,.06); border-bottom: 1px solid rgba(255,255,255,.06); background: rgba(255,255,255,.015); }
+    .privacy-grid { display: grid; grid-template-columns: .85fr 1.15fr; align-items: center; gap: 70px; }
+    .privacy-copy p { color: var(--muted); line-height: 1.72; }
+    .privacy-list { list-style: none; padding: 0; margin: 28px 0 0; }
+    .privacy-list li { display: flex; gap: 12px; margin: 16px 0; color: #dfe3fa; }
+    .check { width: 21px; height: 21px; border-radius: 50%; background: rgba(151,169,255,.12); color: #b5c0ff; display: grid; place-items: center; flex: 0 0 auto; font-size: 12px; }
+
+    .shield-visual { height: 430px; border: 1px solid var(--panel-border); border-radius: 24px; display: grid; place-items: center; background: radial-gradient(circle, rgba(120,128,255,.12), transparent 58%); position: relative; overflow: hidden; }
+    .orbit { position: absolute; border: 1px solid rgba(163,172,255,.13); border-radius: 50%; }
+    .orbit-one { width: 260px; height: 260px; }
+    .orbit-two { width: 340px; height: 340px; }
+    .big-shield { width: 150px; height: 150px; position: relative; z-index: 2; clip-path: polygon(50% 0, 90% 16%, 82% 72%, 50% 100%, 18% 72%, 10% 16%); background: linear-gradient(145deg, #b7bfff, #816cd8); display: grid; place-items: center; filter: drop-shadow(0 22px 35px rgba(126,111,240,.28)); }
+    .big-shield::before { content: ""; width: 68px; height: 68px; clip-path: polygon(50% 0, 90% 16%, 82% 72%, 50% 100%, 18% 72%, 10% 16%); background: #171c35; }
+
+    .cta { text-align: center; padding: 110px 0; }
+    .cta-box { border: 1px solid var(--panel-border); border-radius: 24px; padding: 70px 20px; background: radial-gradient(circle at 50% 100%, rgba(132,127,255,.18), transparent 45%), rgba(255,255,255,.025); }
+    .cta h2 { max-width: 720px; margin-inline: auto; }
+    .cta p { color: var(--muted); margin-bottom: 28px; }
+
+    footer { height: 90px; border-top: 1px solid rgba(255,255,255,.06); display: flex; align-items: center; justify-content: space-between; color: #858ba7; font-size: 13px; }
+
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; padding-top: 60px; text-align: center; }
+      .hero-copy > p { margin-inline: auto; }
+      .actions { justify-content: center; }
+      .browser-stage { min-height: 470px; }
+      .features { grid-template-columns: 1fr; }
+      .feature { min-height: 220px; }
+      .privacy-grid { grid-template-columns: 1fr; }
+      .privacy-copy { text-align: center; }
+      .privacy-list { max-width: 470px; margin-inline: auto; text-align: left; }
+      .nav-links a:not(.nav-download) { display: none; }
+    }
+
+    @media (max-width: 600px) {
+      .container { width: min(100% - 28px, 1120px); }
+      nav { height: 72px; }
+      .hero { min-height: auto; padding-top: 38px; }
+      h1 { font-size: 58px; }
+      .hero-copy > p { font-size: 16px; }
+      .actions { flex-direction: column; }
+      .browser-stage { min-height: 390px; transform: scale(.72); margin: -50px -90px; }
+      .browser { transform: rotateY(-5deg) rotateX(2deg); }
+      section { padding: 70px 0; }
+      .shield-visual { height: 350px; }
+      footer { flex-direction: column; justify-content: center; gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="container">
+    <nav>
+      <a class="brand" href="#" aria-label="AURA home">
+        <span class="brand-mark">A</span>
+        <span>AURA</span>
+      </a>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#privacy">Privacy</a>
+        <a href="#download" class="nav-download">Download</a>
+      </div>
+    </nav>
+
+    <div class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="eyebrow-dot"></span> Privacy without compromise</div>
+        <h1>The browser<br><span class="gradient-text">you control.</span></h1>
+        <p>AURA brings together thoughtful design, private browsing, and powerful protection — keeping you focused on the web, not on who is watching.</p>
+        <div class="actions">
+          <a class="button button-primary" href="#download">Download AURA <span>↓</span></a>
+          <a class="button button-secondary" href="#privacy">Explore privacy</a>
+        </div>
+      </div>
+
+      <div class="browser-stage" aria-label="AURA browser preview">
+        <div class="floating-card float-one"><span class="card-icon">✓</span><span><strong>Protected</strong><br>No trackers found</span></div>
+        <div class="floating-card float-two"><span class="card-icon">◈</span><span><strong>VPN ready</strong><br>Your connection, secured</span></div>
+        <div class="browser">
+          <div class="browser-bar">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            <div class="address"><span class="address-lock">●</span> aura://private</div>
+          </div>
+          <div class="browser-body">
+            <aside class="sidebar">
+              <div class="sidebar-line active"></div><div class="sidebar-line"></div><div class="sidebar-line"></div><div class="sidebar-line"></div>
+            </aside>
+            <main class="dashboard">
+              <div class="dash-top"><div class="mini-logo">A</div><div style="font-size:9px;color:#77819e">Private dashboard</div></div>
+              <div class="shield-ring"><span></span></div>
+              <div class="dash-title">You are protected</div>
+              <div class="dash-sub">Tracking prevention is active</div>
+            </main>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="features">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-kicker">Built for better browsing</span>
+          <h2>Fast, private, and beautifully simple.</h2>
+          <p>Security should feel effortless. AURA keeps essential protections close at hand and out of your way.</p>
+        </div>
+        <div class="features">
+          <article class="feature">
+            <div class="feature-icon">◉</div>
+            <h3>Smart ad blocking</h3>
+            <p>Reduce intrusive ads, noisy banners, and unwanted content for a cleaner web experience.</p>
+          </article>
+          <article class="feature">
+            <div class="feature-icon">⌁</div>
+            <h3>Tracker prevention</h3>
+            <p>Limit cross-site tracking so your browsing behavior stays less visible to advertisers and data brokers.</p>
+          </article>
+          <article class="feature">
+            <div class="feature-icon">◈</div>
+            <h3>Private by design</h3>
+            <p>Core privacy controls are available from the browser itself — clear, understandable, and always within reach.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="privacy" id="privacy">
+      <div class="container privacy-grid">
+        <div class="privacy-copy">
+          <span class="section-kicker">Privacy center</span>
+          <h2>Your privacy is not a setting you should guess.</h2>
+          <p>AURA puts you in control with clear, accessible protection features and less reliance on invasive online profiles.</p>
+          <ul class="privacy-list">
+            <li><span class="check">✓</span><span>Local-first privacy controls</span></li>
+            <li><span class="check">✓</span><span>Clear tracker and ad information</span></li>
+            <li><span class="check">✓</span><span>Private tabs and browsing sessions</span></li>
+            <li><span class="check">✓</span><span>Security-conscious default experience</span></li>
+          </ul>
+        </div>
+        <div class="shield-visual">
+          <div class="orbit orbit-one"></div>
+          <div class="orbit orbit-two"></div>
+          <div class="big-shield"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta" id="download">
+      <div class="container">
+        <div class="cta-box">
+          <span class="section-kicker">Meet AURA</span>
+          <h2>Make the internet feel more private.</h2>
+          <p>One browser. More control. Less noise.</p>
+          <a class="button button-primary" href="#">Download for Windows <span>↓</span></a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="container">
+    <a class="brand" href="#"><span class="brand-mark" style="width:30px;height:30px;border-radius:9px;font-size:17px">A</span><span>AURA</span></a>
+    <span>© 2026 AURA Browser</span>
+  </footer>
+</body>
+</html>
